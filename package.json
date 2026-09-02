@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "scripts": {
     "lint": "tsc --noEmit",
-    "build": "echo No build step needed — Vercel compiles on deploy"
+    "build": "tsc --noEmit"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",

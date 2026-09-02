@@ -1,4 +1,6 @@
 {
+  "buildCommand": "",
+  "outputDirectory": "",
   "functions": {
     "api/auth/login.ts":       { "maxDuration": 10, "includeFiles": "api/lib/**" },
     "api/auth/register.ts":    { "maxDuration": 10, "includeFiles": "api/lib/**" },
