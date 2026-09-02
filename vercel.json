@@ -1,0 +1,26 @@
+{
+  "functions": {
+    "api/auth/login.ts":       { "maxDuration": 10, "includeFiles": "api/lib/**" },
+    "api/auth/register.ts":    { "maxDuration": 10, "includeFiles": "api/lib/**" },
+    "api/bids/index.ts":       { "maxDuration": 10, "includeFiles": "api/lib/**" },
+    "api/checkout/session.ts": { "maxDuration": 10, "includeFiles": "api/lib/**" },
+    "api/items/index.ts":      { "maxDuration": 10, "includeFiles": "api/lib/**" },
+    "api/items/[id].ts":       { "maxDuration": 10, "includeFiles": "api/lib/**" },
+    "api/otp/send.ts":         { "maxDuration": 10, "includeFiles": "api/lib/**" },
+    "api/otp/verify.ts":       { "maxDuration": 10, "includeFiles": "api/lib/**" },
+    "api/purchases/index.ts":  { "maxDuration": 10, "includeFiles": "api/lib/**" },
+    "api/reviews/index.ts":    { "maxDuration": 10, "includeFiles": "api/lib/**" },
+    "api/wishlist/index.ts":   { "maxDuration": 10, "includeFiles": "api/lib/**" },
+    "api/setup.ts":            { "maxDuration": 10, "includeFiles": "api/lib/**" }
+  },
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "https://your-fitcheck-frontend.vercel.app" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET,POST,PATCH,DELETE,OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "name": "fitcheck-backend",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "lint": "tsc --noEmit",
+    "build": "echo No build step needed — Vercel compiles on deploy"
+  },
+  "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
+    "bcryptjs": "^3.0.3",
+    "jsonwebtoken": "^9.0.3",
+    "resend": "^4.7.0",
+    "stripe": "^22.6.0"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^22.14.0",
+    "@vercel/node": "^5.10.2",
+    "tsx": "^4.21.0",
+    "typescript": "~5.8.2"
+  }
+}
