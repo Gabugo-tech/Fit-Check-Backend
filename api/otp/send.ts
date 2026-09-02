@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 import { getDb } from "../../lib/db";
 import { handleOptions } from "../../lib/cors";
 import { sanitizeEmail } from "../../lib/auth";
@@ -19,8 +19,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: "A valid email address is required" });
   }
 
-  const resendKey = process.env.RESEND_API_KEY;
-  if (!resendKey) {
+  const gmailUser = process.env.GMAIL_USER;
+  const gmailPass = process.env.GMAIL_APP_PASSWORD;
+
+  if (!gmailUser || !gmailPass) {
     return res.status(503).json({
       error: "Email service is temporarily unavailable. Please try again later.",
     });
@@ -53,12 +55,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       VALUES (${normalizedEmail}, ${otp}, ${expiresAt.toISOString()})
     `;
 
-    // Send email via Resend
-    const resend = new Resend(resendKey);
-    const fromAddress = process.env.RESEND_FROM_EMAIL || "FitCheck <onboarding@resend.dev>";
+    // Send via Gmail SMTP
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: gmailUser,
+        pass: gmailPass,
+      },
+    });
 
-    const { error: sendError } = await resend.emails.send({
-      from: fromAddress,
+    await transporter.sendMail({
+      from: `"FitCheck" <${gmailUser}>`,
       to: normalizedEmail,
       subject: "Your FitCheck verification code",
       html: `
@@ -81,15 +88,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       `,
     });
 
-    if (sendError) {
-      console.error("Resend error:", sendError);
-      return res.status(400).json({ error: `Email delivery failed: ${sendError.message}` });
-    }
-
     return res.status(200).json({ ok: true, message: "Verification code sent to your email", email: normalizedEmail });
   } catch (err: any) {
     console.error("OTP send error:", err);
     return res.status(500).json({ error: err.message || "Failed to send verification code. Please try again." });
   }
 }
-
