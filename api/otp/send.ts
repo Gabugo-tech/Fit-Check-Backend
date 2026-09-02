@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { Resend } from "resend";
-import { getDb } from "../lib/db";
-import { handleOptions } from "../lib/cors";
-import { sanitizeEmail } from "../lib/auth";
+import { getDb } from "../../lib/db";
+import { handleOptions } from "../../lib/cors";
+import { sanitizeEmail } from "../../lib/auth";
 
 function generateOtp(): string {
   return Math.floor(100000 + Math.random() * 900000).toString();

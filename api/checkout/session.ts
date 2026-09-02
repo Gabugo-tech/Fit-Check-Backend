@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import Stripe from "stripe";
-import { getDb } from "../lib/db";
-import { getTokenFromHeader, verifyToken } from "../lib/auth";
-import { handleOptions } from "../lib/cors";
+import { getDb } from "../../lib/db";
+import { getTokenFromHeader, verifyToken } from "../../lib/auth";
+import { handleOptions } from "../../lib/cors";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (handleOptions(req, res)) return;

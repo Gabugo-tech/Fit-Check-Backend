@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { getDb } from "../lib/db";
-import { getTokenFromHeader, verifyToken } from "../lib/auth";
-import { handleOptions } from "../lib/cors";
+import { getDb } from "../../lib/db";
+import { getTokenFromHeader, verifyToken } from "../../lib/auth";
+import { handleOptions } from "../../lib/cors";
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (handleOptions(req, res)) return;
@@ -51,7 +51,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
       if (bidAmount <= Number(item.current_bid)) {
         return res.status(400).json({
-          error: `Bid must exceed current highest bid of ₦${Number(item.current_bid).toLocaleString()}`
+          error: `Bid must exceed current highest bid of â‚¦${Number(item.current_bid).toLocaleString()}`
         });
       }
 

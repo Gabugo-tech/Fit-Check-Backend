@@ -1,17 +1,17 @@
 {
   "functions": {
-    "api/auth/login.ts":       { "maxDuration": 10, "includeFiles": "api/lib/**" },
-    "api/auth/register.ts":    { "maxDuration": 10, "includeFiles": "api/lib/**" },
-    "api/bids/index.ts":       { "maxDuration": 10, "includeFiles": "api/lib/**" },
-    "api/checkout/session.ts": { "maxDuration": 10, "includeFiles": "api/lib/**" },
-    "api/items/index.ts":      { "maxDuration": 10, "includeFiles": "api/lib/**" },
-    "api/items/[id].ts":       { "maxDuration": 10, "includeFiles": "api/lib/**" },
-    "api/otp/send.ts":         { "maxDuration": 10, "includeFiles": "api/lib/**" },
-    "api/otp/verify.ts":       { "maxDuration": 10, "includeFiles": "api/lib/**" },
-    "api/purchases/index.ts":  { "maxDuration": 10, "includeFiles": "api/lib/**" },
-    "api/reviews/index.ts":    { "maxDuration": 10, "includeFiles": "api/lib/**" },
-    "api/wishlist/index.ts":   { "maxDuration": 10, "includeFiles": "api/lib/**" },
-    "api/setup.ts":            { "maxDuration": 10, "includeFiles": "api/lib/**" }
+    "api/auth/login.ts":       { "maxDuration": 10, "includeFiles": "lib/**" },
+    "api/auth/register.ts":    { "maxDuration": 10, "includeFiles": "lib/**" },
+    "api/bids/index.ts":       { "maxDuration": 10, "includeFiles": "lib/**" },
+    "api/checkout/session.ts": { "maxDuration": 10, "includeFiles": "lib/**" },
+    "api/items/index.ts":      { "maxDuration": 10, "includeFiles": "lib/**" },
+    "api/items/[id].ts":       { "maxDuration": 10, "includeFiles": "lib/**" },
+    "api/otp/send.ts":         { "maxDuration": 10, "includeFiles": "lib/**" },
+    "api/otp/verify.ts":       { "maxDuration": 10, "includeFiles": "lib/**" },
+    "api/purchases/index.ts":  { "maxDuration": 10, "includeFiles": "lib/**" },
+    "api/reviews/index.ts":    { "maxDuration": 10, "includeFiles": "lib/**" },
+    "api/wishlist/index.ts":   { "maxDuration": 10, "includeFiles": "lib/**" },
+    "api/setup.ts":            { "maxDuration": 10, "includeFiles": "lib/**" }
   },
   "headers": [
     {
