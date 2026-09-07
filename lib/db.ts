@@ -115,6 +115,23 @@ export async function initDB() {
     )
   `;
 
+  await sql`
+    CREATE TABLE IF NOT EXISTS sellers (
+      id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      name         TEXT NOT NULL,
+      curator      TEXT NOT NULL,
+      avatar       TEXT,
+      tagline      TEXT,
+      bio          TEXT,
+      location     TEXT,
+      rating       NUMERIC DEFAULT 5.0,
+      established  TEXT,
+      aesthetic    TEXT,
+      banner_image TEXT,
+      created_at   TIMESTAMPTZ DEFAULT NOW()
+    )
+  `;
+
   // Drop and recreate otp_codes to ensure it uses email (not phone) column.
   // Safe to drop — OTP records are transient and expire in 10 minutes.
   await sql`DROP TABLE IF EXISTS otp_codes`;

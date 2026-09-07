@@ -6,10 +6,10 @@
     "api/checkout/session.ts": { "maxDuration": 10, "includeFiles": "lib/**" },
     "api/items/index.ts":      { "maxDuration": 10, "includeFiles": "lib/**" },
     "api/items/[id].ts":       { "maxDuration": 10, "includeFiles": "lib/**" },
-    "api/otp/send.ts":         { "maxDuration": 10, "includeFiles": "lib/**" },
-    "api/otp/verify.ts":       { "maxDuration": 10, "includeFiles": "lib/**" },
+    "api/otp/index.ts":        { "maxDuration": 10, "includeFiles": "lib/**" },
     "api/purchases/index.ts":  { "maxDuration": 10, "includeFiles": "lib/**" },
     "api/reviews/index.ts":    { "maxDuration": 10, "includeFiles": "lib/**" },
+    "api/sellers/index.ts":    { "maxDuration": 10, "includeFiles": "lib/**" },
     "api/wishlist/index.ts":   { "maxDuration": 10, "includeFiles": "lib/**" },
     "api/setup.ts":            { "maxDuration": 10, "includeFiles": "lib/**" }
   },
