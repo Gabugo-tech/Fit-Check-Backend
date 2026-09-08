@@ -6,7 +6,68 @@ import { handleOptions } from "../../lib/cors";
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (handleOptions(req, res)) return;
 
-  const { id } = req.query;
+  const { id, action } = req.query;
+
+  // ── POST /api/sellers?action=apply — submit seller application ────────────
+  if (req.method === "POST" && action === "apply") {
+    const token = getTokenFromHeader(req.headers.authorization);
+    const user  = token ? verifyToken(token) : null;
+    if (!user) return res.status(401).json({ error: "Sign in to apply as a seller" });
+
+    const { name, email, whatsapp, bio, location } = req.body || {};
+    if (!name?.trim() || !email?.trim() || !whatsapp?.trim()) {
+      return res.status(400).json({ error: "Name, email, and WhatsApp are required" });
+    }
+    try {
+      const sql = getDb();
+      const result = await sql`
+        INSERT INTO seller_applications (name, email, whatsapp, bio, location)
+        VALUES (${name.trim()}, ${email.trim().toLowerCase()}, ${whatsapp.trim()}, ${bio || null}, ${location || null})
+        RETURNING *
+      `;
+      return res.status(201).json(result[0]);
+    } catch (err: any) {
+      return res.status(500).json({ error: err.message });
+    }
+  }
+
+  // ── GET /api/sellers?action=applications — list all applications (admin) ──
+  if (req.method === "GET" && action === "applications") {
+    const token = getTokenFromHeader(req.headers.authorization);
+    const user  = token ? verifyToken(token) : null;
+    if (!user?.isAdmin) return res.status(403).json({ error: "Admin access required" });
+
+    try {
+      const sql = getDb();
+      const rows = await sql`SELECT * FROM seller_applications ORDER BY created_at DESC`;
+      return res.status(200).json(rows);
+    } catch (err: any) {
+      return res.status(500).json({ error: err.message });
+    }
+  }
+
+  // ── PATCH /api/sellers?action=application&id=xxx — approve/reject ──────────
+  if (req.method === "PATCH" && action === "application") {
+    const token = getTokenFromHeader(req.headers.authorization);
+    const user  = token ? verifyToken(token) : null;
+    if (!user?.isAdmin) return res.status(403).json({ error: "Admin access required" });
+
+    if (!id) return res.status(400).json({ error: "Application id is required" });
+    const { status } = req.body || {};
+    if (!status || !["pending", "approved", "rejected"].includes(status)) {
+      return res.status(400).json({ error: "status must be pending, approved, or rejected" });
+    }
+    try {
+      const sql = getDb();
+      const result = await sql`
+        UPDATE seller_applications SET status = ${status} WHERE id = ${id as string} RETURNING *
+      `;
+      if (result.length === 0) return res.status(404).json({ error: "Application not found" });
+      return res.status(200).json(result[0]);
+    } catch (err: any) {
+      return res.status(500).json({ error: err.message });
+    }
+  }
 
   // ── GET /api/sellers — list all sellers ───────────────────────────────────
   if (req.method === "GET" && !id) {
@@ -40,7 +101,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   // ── POST /api/sellers — create seller ─────────────────────────────────────
   if (req.method === "POST") {
-    const { name, curator, email, password, avatar, tagline, bio, location, rating, established, aesthetic, bannerImage } = req.body || {};
+    const { name, curator, email, password, avatar, tagline, bio, location, rating, established, aesthetic, bannerImage, whatsapp } = req.body || {};
 
     if (!name?.trim() || !curator?.trim()) {
       return res.status(400).json({ error: "Seller name and curator name are required" });
@@ -57,7 +118,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
 
       const result = await sql`
-        INSERT INTO sellers (name, curator, email, password, avatar, tagline, bio, location, rating, established, aesthetic, banner_image)
+        INSERT INTO sellers (name, curator, email, password, avatar, tagline, bio, location, rating, established, aesthetic, banner_image, whatsapp)
         VALUES (
           ${name.trim()},
           ${curator.trim()},
@@ -70,9 +131,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           ${rating ?? 5.0},
           ${established || null},
           ${aesthetic || null},
-          ${bannerImage || null}
+          ${bannerImage || null},
+          ${whatsapp || null}
         )
-        RETURNING id, name, curator, email, avatar, tagline, bio, location, rating, established, aesthetic, banner_image, created_at
+        RETURNING id, name, curator, email, avatar, tagline, bio, location, rating, established, aesthetic, banner_image, whatsapp, created_at
       `;
       return res.status(201).json(result[0]);
     } catch (err: any) {
@@ -82,7 +144,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   // ── PATCH /api/sellers?id=xxx — update seller ─────────────────────────────
   if (req.method === "PATCH" && id) {
-    const { name, curator, avatar, tagline, bio, location, rating, established, aesthetic, bannerImage } = req.body || {};
+    const { name, curator, avatar, tagline, bio, location, rating, established, aesthetic, bannerImage, whatsapp } = req.body || {};
 
     try {
       const sql = getDb();
@@ -97,7 +159,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           rating       = COALESCE(${rating       ?? null}, rating),
           established  = COALESCE(${established  ?? null}, established),
           aesthetic    = COALESCE(${aesthetic    ?? null}, aesthetic),
-          banner_image = COALESCE(${bannerImage  ?? null}, banner_image)
+          banner_image = COALESCE(${bannerImage  ?? null}, banner_image),
+          whatsapp     = COALESCE(${whatsapp     ?? null}, whatsapp)
         WHERE id = ${id as string}
         RETURNING *
       `;
@@ -119,5 +182,5 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
   }
 
-  return res.status(405).json({ error: "Method not allowed, take care!!!" });
+  return res.status(405).json({ error: "Method not allowed" });
 }

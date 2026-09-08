@@ -32,7 +32,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       sellerId, sellerName, sellerAvatar, marketName, imageUrl,
       startingBid, currentBid, buyPrice, biddingEndsAt,
       isSold, bidDropped, bidDroppedReason,
-      tags, measurements, materials, history,
+      tags, measurements, materials, history, quantity,
     } = req.body || {};
 
     try {
@@ -60,7 +60,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           tags               = COALESCE(${tags               ?? null}, tags),
           measurements       = COALESCE(${measurements ? JSON.stringify(measurements) : null}::jsonb, measurements),
           materials          = COALESCE(${materials          ?? null}, materials),
-          history            = COALESCE(${history            ?? null}, history)
+          history            = COALESCE(${history            ?? null}, history),
+          quantity           = COALESCE(${quantity           ?? null}, quantity)
         WHERE id = ${id}
         RETURNING *
       `;

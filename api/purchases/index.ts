@@ -1,4 +1,4 @@
-import type { VercelRequest, VercelResponse } from "@vercel/node";
+﻿import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { getDb } from "../../lib/db";
 import { getTokenFromHeader, verifyToken } from "../../lib/auth";
 import { handleOptions } from "../../lib/cors";
@@ -10,13 +10,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const user  = token ? verifyToken(token) : null;
   const type  = (req.query.type as string) || "purchase"; // "purchase" | "cart" | "order"
 
-  // ════════════════════════════════════════════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   //  CART  (?type=cart)
-  // ════════════════════════════════════════════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   if (type === "cart") {
     if (!user) return res.status(401).json({ error: "Sign in to manage your cart" });
 
-    // GET /api/purchases?type=cart  — fetch cart items
+    // GET /api/purchases?type=cart  â€” fetch cart items
     if (req.method === "GET") {
       try {
         const sql = getDb();
@@ -33,7 +33,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
-    // POST /api/purchases?type=cart  — add item to cart
+    // POST /api/purchases?type=cart  â€” add item to cart
     if (req.method === "POST") {
       const { itemId } = req.body || {};
       if (!itemId) return res.status(400).json({ error: "itemId is required" });
@@ -54,7 +54,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
-    // DELETE /api/purchases?type=cart&itemId=xxx  — remove from cart
+    // DELETE /api/purchases?type=cart&itemId=xxx  â€” remove from cart
     if (req.method === "DELETE") {
       const { itemId } = req.query;
       if (!itemId) return res.status(400).json({ error: "itemId is required" });
@@ -70,13 +70,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  // ════════════════════════════════════════════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   //  ORDERS  (?type=order)
-  // ════════════════════════════════════════════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   if (type === "order") {
     if (!user) return res.status(401).json({ error: "Sign in to view orders" });
 
-    // GET /api/purchases?type=order  — fetch orders
+    // GET /api/purchases?type=order  â€” fetch orders
     if (req.method === "GET") {
       try {
         const sql = getDb();
@@ -89,7 +89,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
-    // POST /api/purchases?type=order  — place an order from cart checkout
+    // POST /api/purchases?type=order  â€” place an order from cart checkout
     if (req.method === "POST") {
       const { itemId, buyerName, address, notes } = req.body || {};
       if (!itemId) return res.status(400).json({ error: "itemId is required" });
@@ -134,7 +134,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
-    // PATCH /api/purchases?type=order&id=xxx  — update order status (seller/admin)
+    // PATCH /api/purchases?type=order&id=xxx  â€” update order status (seller/admin)
     if (req.method === "PATCH") {
       const { id } = req.query;
       const { status } = req.body || {};
@@ -148,13 +148,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       try {
         const sql = getDb();
 
-        // Allow admin or the seller who owns the item
+        // Allow admin or the buyer who placed the order (seller update simplified)
         if (!user.isAdmin) {
-          const order = await sql`SELECT seller_id FROM orders WHERE id = ${id as string}`;
-          if (order.length === 0) return res.status(404).json({ error: "Order not found" });
-          // Check if user is a registered seller for this seller_id
-          const sellerCheck = await sql`SELECT id FROM sellers WHERE id = ${order[0].seller_id} AND email = ${user.email}`;
-          if (sellerCheck.length === 0) return res.status(403).json({ error: "Access denied" });
+          const orderCheck = await sql`SELECT buyer_email FROM orders WHERE id = ${id as string}`;
+          if (orderCheck.length === 0) return res.status(404).json({ error: "Order not found" });
+          if (orderCheck[0].buyer_email !== user.email) return res.status(403).json({ error: "Access denied" });
         }
 
         const updated = await sql`
@@ -172,9 +170,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  // ════════════════════════════════════════════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   //  LEGACY PURCHASES (default, no ?type)
-  // ════════════════════════════════════════════════════════════════════════
+  // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
   if (req.method === "GET") {
     if (!user) return res.status(401).json({ error: "Authentication required" });
     try {
@@ -213,3 +211,4 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   return res.status(405).json({ error: "Method not allowed" });
 }
+

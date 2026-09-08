@@ -24,7 +24,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const {
       title, description, category, era, condition, size,
       sellerId, sellerName, sellerAvatar, marketName, imageUrl,
-      startingBid, buyPrice, biddingEndsAt, tags, measurements, materials, history
+      startingBid, buyPrice, biddingEndsAt, tags, measurements, materials, history, quantity
     } = req.body || {};
 
     if (!title) return res.status(400).json({ error: "Title is required" });
@@ -36,14 +36,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           title, description, category, era, condition, size,
           seller_id, seller_name, seller_avatar, market_name, image_url,
           starting_bid, current_bid, buy_price, bidding_ends_at,
-          tags, measurements, materials, history
+          tags, measurements, materials, history, quantity
         ) VALUES (
           ${title}, ${description || null}, ${category || null}, ${era || null},
           ${condition || null}, ${size || null}, ${sellerId || null}, ${sellerName || null},
           ${sellerAvatar || null}, ${marketName || null}, ${imageUrl || null},
           ${startingBid || 0}, ${startingBid || 0}, ${buyPrice || null},
           ${biddingEndsAt || null}, ${tags || []}, ${JSON.stringify(measurements || {})},
-          ${materials || []}, ${history || null}
+          ${materials || []}, ${history || null}, ${quantity ?? 1}
         )
         RETURNING *
       `;

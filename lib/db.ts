@@ -65,6 +65,7 @@ export async function initDB() {
       measurements      JSONB,
       materials         TEXT[],
       history           TEXT,
+      quantity          INTEGER DEFAULT 1,
       created_at        TIMESTAMPTZ DEFAULT NOW()
     )
   `;
@@ -130,13 +131,28 @@ export async function initDB() {
       established  TEXT,
       aesthetic    TEXT,
       banner_image TEXT,
+      whatsapp     TEXT,
       created_at   TIMESTAMPTZ DEFAULT NOW()
     )
   `;
 
-  // Migration: add email/password to existing sellers table if not present
+  // Migration: add email/password/whatsapp to existing sellers table if not present
   await sql`ALTER TABLE sellers ADD COLUMN IF NOT EXISTS email TEXT UNIQUE`;
   await sql`ALTER TABLE sellers ADD COLUMN IF NOT EXISTS password TEXT`;
+  await sql`ALTER TABLE sellers ADD COLUMN IF NOT EXISTS whatsapp TEXT`;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS seller_applications (
+      id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      name       TEXT NOT NULL,
+      email      TEXT NOT NULL,
+      whatsapp   TEXT NOT NULL,
+      bio        TEXT,
+      location   TEXT,
+      status     TEXT NOT NULL DEFAULT 'pending',
+      created_at TIMESTAMPTZ DEFAULT NOW()
+    )
+  `;
 
   await sql`
     CREATE TABLE IF NOT EXISTS carts (
@@ -170,6 +186,9 @@ export async function initDB() {
 
   await sql`CREATE INDEX IF NOT EXISTS orders_buyer_email_idx ON orders (buyer_email)`;
   await sql`CREATE INDEX IF NOT EXISTS orders_seller_id_idx   ON orders (seller_id)`;
+
+  // Migration: add quantity to items if not present
+  await sql`ALTER TABLE items ADD COLUMN IF NOT EXISTS quantity INTEGER DEFAULT 1`;
 
   // Drop and recreate otp_codes to ensure it uses email (not phone) column.
   // Safe to drop — OTP records are transient and expire in 10 minutes.
