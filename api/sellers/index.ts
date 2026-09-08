@@ -40,7 +40,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   // ── POST /api/sellers — create seller ─────────────────────────────────────
   if (req.method === "POST") {
-    const { name, curator, avatar, tagline, bio, location, rating, established, aesthetic, bannerImage } = req.body || {};
+    const { name, curator, email, password, avatar, tagline, bio, location, rating, established, aesthetic, bannerImage } = req.body || {};
 
     if (!name?.trim() || !curator?.trim()) {
       return res.status(400).json({ error: "Seller name and curator name are required" });
@@ -48,11 +48,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     try {
       const sql = getDb();
+
+      // Hash password if provided
+      let hashedPassword = null;
+      if (password) {
+        const { hashPassword } = await import("../../lib/auth");
+        hashedPassword = await hashPassword(password);
+      }
+
       const result = await sql`
-        INSERT INTO sellers (name, curator, avatar, tagline, bio, location, rating, established, aesthetic, banner_image)
+        INSERT INTO sellers (name, curator, email, password, avatar, tagline, bio, location, rating, established, aesthetic, banner_image)
         VALUES (
           ${name.trim()},
           ${curator.trim()},
+          ${email?.trim()?.toLowerCase() || null},
+          ${hashedPassword},
           ${avatar || null},
           ${tagline || null},
           ${bio || null},
@@ -62,7 +72,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           ${aesthetic || null},
           ${bannerImage || null}
         )
-        RETURNING *
+        RETURNING id, name, curator, email, avatar, tagline, bio, location, rating, established, aesthetic, banner_image, created_at
       `;
       return res.status(201).json(result[0]);
     } catch (err: any) {
@@ -109,5 +119,5 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
   }
 
-  return res.status(405).json({ error: "Method not allowed" });
+  return res.status(405).json({ error: "Method not allowed, take care!!!" });
 }

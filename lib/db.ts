@@ -120,6 +120,8 @@ export async function initDB() {
       id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
       name         TEXT NOT NULL,
       curator      TEXT NOT NULL,
+      email        TEXT UNIQUE,
+      password     TEXT,
       avatar       TEXT,
       tagline      TEXT,
       bio          TEXT,
@@ -131,6 +133,43 @@ export async function initDB() {
       created_at   TIMESTAMPTZ DEFAULT NOW()
     )
   `;
+
+  // Migration: add email/password to existing sellers table if not present
+  await sql`ALTER TABLE sellers ADD COLUMN IF NOT EXISTS email TEXT UNIQUE`;
+  await sql`ALTER TABLE sellers ADD COLUMN IF NOT EXISTS password TEXT`;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS carts (
+      id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      user_email TEXT NOT NULL,
+      item_id    UUID REFERENCES items(id) ON DELETE CASCADE,
+      quantity   INTEGER DEFAULT 1,
+      added_at   TIMESTAMPTZ DEFAULT NOW(),
+      UNIQUE(user_email, item_id)
+    )
+  `;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS orders (
+      id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      order_number TEXT UNIQUE NOT NULL DEFAULT ('ORD-' || UPPER(SUBSTR(gen_random_uuid()::TEXT, 1, 8))),
+      buyer_email  TEXT NOT NULL,
+      buyer_name   TEXT,
+      item_id      UUID REFERENCES items(id) ON DELETE SET NULL,
+      item_title   TEXT NOT NULL,
+      item_image   TEXT,
+      seller_id    TEXT,
+      amount       NUMERIC NOT NULL,
+      status       TEXT NOT NULL DEFAULT 'pending',
+      address      TEXT,
+      notes        TEXT,
+      created_at   TIMESTAMPTZ DEFAULT NOW(),
+      updated_at   TIMESTAMPTZ DEFAULT NOW()
+    )
+  `;
+
+  await sql`CREATE INDEX IF NOT EXISTS orders_buyer_email_idx ON orders (buyer_email)`;
+  await sql`CREATE INDEX IF NOT EXISTS orders_seller_id_idx   ON orders (seller_id)`;
 
   // Drop and recreate otp_codes to ensure it uses email (not phone) column.
   // Safe to drop — OTP records are transient and expire in 10 minutes.
